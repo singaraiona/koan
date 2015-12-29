@@ -1,31 +1,38 @@
 %{
     #include <stdio.h>
-    int yylex(void);
-    void yyerror(char *);
+    #include "kt.h"
+    I yylex();
+    I yyerror(S);
+    I plus(I x,I y);
 %}
 
-%token INTEGER
-
+%token INT
+%token CHR
 %%
 
-program:
-        program expr '\n'         { printf("%d\n", $2); }
-        | 
-        ;
-
+line:
+    line expr '\n' {P("%d\n",$2);}
+    |/*nothing*/
+    ;
+item:
+    INT
+    | CHR
+    ;
+list:
+    item
+    | list ' ' item {$$=666;}
+    ;
 expr:
-        INTEGER
-        | expr '+' expr           { $$ = $1 + $3; }
-        | expr '-' expr           { $$ = $1 - $3; }
-        ;
-
+    list {$$=$0;}
+    | expr '+' expr {$$=plus($1,$3);}
+    | expr '-' expr {$$=$1-$3;}
+    | expr '*' expr {$$=$1*$3;}
+    | expr '#' expr {yyerror("nyi");}
+    ;
 %%
 
-void yyerror(char *s) {
-    fprintf(stderr, "%s\n", s);
-}
+I plus(I x,I y){R x+y;}
+I minus(I x,I y){R x-y;}
 
-int main(void) {
-    yyparse();
-    return 0;
-}
+I yyerror(S s){OL(s);R 1;}
+I main(){yyparse();R 0;}
